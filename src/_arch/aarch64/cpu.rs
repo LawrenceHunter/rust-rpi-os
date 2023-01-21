@@ -2,16 +2,24 @@
 //
 // Copyright (c) 2018-2022 Andre Richter <andre.o.richter@gmail.com>
 
-//! A panic handler that infinitely waits.
+//! Architectural processor code.
+//!
+//! # Orientation
+//!
+//! Since arch modules are imported into generic modules using the path attribute, the path of this
+//! file is:
+//!
+//! crate::cpu::arch_cpu
 
-use crate::cpu;
-use core::panic::PanicInfo;
+use aarch64_cpu::asm;
 
 //--------------------------------------------------------------------------------------------------
-// Private Code
+// Public Code
 //--------------------------------------------------------------------------------------------------
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    cpu::wait_forever()
+#[inline(always)]
+pub fn wait_forever() -> ! {
+    loop {
+        asm::wfe()
+    }
 }
