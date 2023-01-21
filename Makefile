@@ -9,6 +9,9 @@
 # Default to the RPi3.
 BSP ?= rpi3
 
+# Default to a serial device name that is common in Linux.
+DEV_SERIAL ?= /dev/ttyUSB0
+
 ##--------------------------------------------------------------------------------------------------
 ## BSP-specific configuration values
 ##--------------------------------------------------------------------------------------------------
@@ -78,11 +81,12 @@ OBJCOPY_CMD = rust-objcopy \
 
 EXEC_QEMU = $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE)
 EXEC_TEST_DISPATCH = ruby ../common/tests/dispatch.rb
+EXEC_MINITERM      = ruby ../common/serial/miniterm.rb
 
 ##--------------------------------------------------------------------------------------------------
 ## Targets
 ##--------------------------------------------------------------------------------------------------
-.PHONY: all doc qemu clippy clean readelf objdump nm check
+.PHONY: all doc qemu miniterm clippy clean readelf objdump nm check
 
 all: $(KERNEL_BIN)
 
@@ -133,6 +137,12 @@ qemu: $(KERNEL_BIN)
 	$(call color_header, "Launching QEMU")
 	$(EXEC_QEMU) $(QEMU_RELEASE_ARGS) -kernel $(KERNEL_BIN)
 endif
+
+##------------------------------------------------------------------------------
+## Connect to the target's serial
+##------------------------------------------------------------------------------
+miniterm:
+	$(EXEC_MINITERM) $(DEV_SERIAL)
 
 ##------------------------------------------------------------------------------
 ## Run clippy
