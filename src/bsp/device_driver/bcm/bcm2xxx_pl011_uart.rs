@@ -89,7 +89,7 @@ register_bitfields! {
         UARTEN OFFSET(0) NUMBITS(1) [
             Disabled = 0,
             Enabled = 1
-        ],
+        ]
     ],
 
     // Interrupt Clear Register

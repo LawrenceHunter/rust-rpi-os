@@ -81,7 +81,7 @@ OBJCOPY_CMD = rust-objcopy \
 
 EXEC_QEMU = $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE)
 EXEC_TEST_DISPATCH = ruby ../common/tests/dispatch.rb
-EXEC_MINITERM      = ruby ../common/serial/miniterm.rb
+EXEC_MINITERM      = ruby miniterm.rb
 
 ##--------------------------------------------------------------------------------------------------
 ## Targets
@@ -169,6 +169,7 @@ readelf: $(KERNEL_ELF)
 objdump: $(KERNEL_ELF)
 	$(call color_header, "Launching objdump")
 	@$(DOCKER_TOOLS) $(OBJDUMP_BINARY) --disassemble --demangle \
+                --section .text     \
                 --section .rodata   \
                 $(KERNEL_ELF) | rustfilt
 

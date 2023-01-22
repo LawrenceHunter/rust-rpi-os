@@ -4,9 +4,9 @@
 
 //! Device driver.
 
-#[cfg(any(feature = "bsp_rpi3"))]
+#[cfg(feature = "bsp_rpi3")]
 mod bcm;
 mod common;
 
-#[cfg(any(feature = "bsp_rpi3"))]
+#[cfg(feature = "bsp_rpi3")]
 pub use bcm::*;

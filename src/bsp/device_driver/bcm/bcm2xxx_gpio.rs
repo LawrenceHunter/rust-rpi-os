@@ -132,7 +132,7 @@ impl GPIOInner {
         cpu::spin_for_cycles(DELAY);
 
         self.registers.GPPUDCLK0.write(
-            GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock
+            GPPUDCLK0::PUDCLK15::AssertClock + GPPUDCLK0::PUDCLK14::AssertClock
         );
         cpu::spin_for_cycles(DELAY);
 
@@ -145,7 +145,7 @@ impl GPIOInner {
     pub fn map_pl011_uart(&mut self) {
         // Select UART on pins 14 & 15
         self.registers.GPFSEL1.modify(
-            GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0
+            GPFSEL1::FSEL15::AltFunc0 + GPFSEL1::FSEL14::AltFunc0
         );
 
         // Disable pull-up/down on pins 14 & 15
