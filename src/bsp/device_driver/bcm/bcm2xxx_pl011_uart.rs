@@ -197,7 +197,7 @@ impl PL011UartInner {
     }
 
     // Receive char
-    fn read_char(&mut self, blocking_mode: BlockingMode) -> Option<char> {
+    fn read_char_converting(&mut self, blocking_mode: BlockingMode) -> Option<char> {
         // If RX FIFO empty
         if self.registers.FR.matches_all(FR::RXFE::SET) {
             if blocking_mode == BlockingMode::NonBlocking {
@@ -210,7 +210,12 @@ impl PL011UartInner {
         }
 
         // Read one char
-        let ret = self.registers.DR.get() as u8 as char;
+        let mut ret = self.registers.DR.get() as u8 as char;
+
+        // Convert carriage return to newline
+        if ret == '\r' {
+            ret = '\n'
+        }
 
         self.chars_read += 1;
         Some(ret)
@@ -275,13 +280,13 @@ impl console::interface::Write for PL011Uart {
 impl console::interface::Read for PL011Uart {
     fn read_char(&self) -> char {
         self.inner.lock(
-            |inner| inner.read_char(BlockingMode::Blocking).unwrap()
+            |inner| inner.read_char_converting(BlockingMode::Blocking).unwrap()
         )
     }
 
     fn clear_rx(&self) {
         while self.inner.lock(
-            |inner| inner.read_char(BlockingMode::NonBlocking)
+            |inner| inner.read_char_converting(BlockingMode::NonBlocking)
         ).is_some()
         {}
     }

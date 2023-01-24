@@ -3,6 +3,8 @@
  * Copyright (c) 2018-2022 Andre Richter <andre.o.richter@gmail.com>
  */
 
+__rpi_phys_dram_start_addr = 0;
+
 /* The physical address at which the the kernel binary will be loaded by the Raspberry's firmware */
 __rpi_phys_binary_load_addr = 0x80000;
 
@@ -23,8 +25,7 @@ PHDRS
 
 SECTIONS
 {
-    /* Set link address to 32MiB */
-    . = 0x2000000;
+    . =  __rpi_phys_dram_start_addr;
 
     /***********************************************************************************************
     * Boot Core Stack
@@ -38,7 +39,6 @@ SECTIONS
     /***********************************************************************************************
     * Code + RO Data + Global Offset Table
     ***********************************************************************************************/
-    __binary_nonzero_start = .;
     .text :
     {
         KEEP(*(.text._start))
@@ -57,10 +57,6 @@ SECTIONS
     .data : {
         *(.data*)
     } :segment_data
-
-    /* Fill up to 8 byte as relocating binary is done in u64 chunks */
-    . = ALIGN(8);
-    __binary_nonzero_end_exclusive = .;
 
     .bss (NOLOAD) : ALIGN(16)
     {
