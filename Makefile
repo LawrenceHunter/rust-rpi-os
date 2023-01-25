@@ -26,6 +26,8 @@ ifeq ($(BSP),rpi3)
     OBJDUMP_BINARY    = aarch64-none-elf-objdump
     NM_BINARY         = aarch64-none-elf-nm
     READELF_BINARY    = aarch64-none-elf-readelf
+    OPENOCD_ARG       = -f /usr/share/openocd/scripts/interface/ftdi/olimex-arm-usb-tiny-h.cfg -f /usr/share/openocd/scripts/interface/raspberrypi3.cfg
+    JTAG_BOOT_IMAGE   = jtag_boot_rpi3.img
     LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/raspberrypi
     RUSTC_MISC_ARGS   = -C target-cpu=cortex-a53
 else ifeq ($(BSP),rpi4)
@@ -37,6 +39,8 @@ else ifeq ($(BSP),rpi4)
     OBJDUMP_BINARY    = aarch64-none-elf-objdump
     NM_BINARY         = aarch64-none-elf-nm
     READELF_BINARY    = aarch64-none-elf-readelf
+    OPENOCD_ARG       = -f /openocd/tcl/interface/ftdi/olimex-arm-usb-tiny-h.cfg -f /openocd/rpi4.cfg
+    JTAG_BOOT_IMAGE   = jtag_boot_rpi4.img
     LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/raspberrypi
     RUSTC_MISC_ARGS   = -C target-cpu=cortex-a72
 endif
@@ -179,6 +183,33 @@ objdump: $(KERNEL_ELF)
 nm: $(KERNEL_ELF)
 	$(call color_header, "Launching nm")
 	@$(DOCKER_TOOLS) $(NM_BINARY) --demangle --print-size $(KERNEL_ELF) | sort | rustfilt
+
+##--------------------------------------------------------------------------------------------------
+## Debugging targets
+##--------------------------------------------------------------------------------------------------
+.PHONY: jtagboot openocd gdb gdb-opt0
+
+##------------------------------------------------------------------------------
+## Push the JTAG boot image to the real HW target
+##------------------------------------------------------------------------------
+jtagboot:
+	$(EXEC_MINIPUSH) $(DEV_SERIAL) $(JTAG_BOOT_IMAGE)
+
+##------------------------------------------------------------------------------
+## Start OpenOCD session
+##------------------------------------------------------------------------------
+openocd:
+	$(call color_header, "Launching OpenOCD")
+	openocd $(OPENOCD_ARG)
+
+##------------------------------------------------------------------------------
+## Start GDB session
+##------------------------------------------------------------------------------
+gdb: RUSTC_MISC_ARGS += -C debuginfo=2
+gdb-opt0: RUSTC_MISC_ARGS += -C debuginfo=2 -C opt-level=0
+gdb gdb-opt0: $(KERNEL_ELF)
+	$(call color_header, "Launching GDB")
+	gdb-multiarch -q $(KERNEL_ELF)
 
 ##--------------------------------------------------------------------------------------------------
 ## Testing targets
