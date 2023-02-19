@@ -4,7 +4,7 @@
 
 //! Conditional reexporting of Board Support Packages.
 
-mod device_driver;
+pub mod device_driver;
 
 #[cfg(feature = "bsp_rpi3")]
 mod raspberrypi;
